@@ -30,9 +30,9 @@ public class SignInActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_signin);
 
-        username = (EditText) findViewById(R.id.username);
-        password = (EditText) findViewById(R.id.password);
-        email = (EditText) findViewById(R.id.email);
+        username = (EditText) findViewById(R.id.username_signin);
+        password = (EditText) findViewById(R.id.password_signin);
+        email = (EditText) findViewById(R.id.email_signin);
 
         mAuth = FirebaseAuth.getInstance();
         mDatabase = FirebaseDatabase.getInstance().getReference().child("Users");

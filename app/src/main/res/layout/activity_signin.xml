@@ -17,7 +17,7 @@
         android:layout_toLeftOf="@id/fab">
 
         <EditText
-            android:id="@+id/username"
+            android:id="@+id/username_signin"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Username"
@@ -33,7 +33,7 @@
         android:layout_toLeftOf="@id/fab">
 
         <EditText
-            android:id="@+id/email"
+            android:id="@+id/email_signin"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Email"
@@ -49,7 +49,7 @@
         android:layout_toLeftOf="@id/fab">
 
         <EditText
-            android:id="@+id/password"
+            android:id="@+id/password_signin"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Password"
