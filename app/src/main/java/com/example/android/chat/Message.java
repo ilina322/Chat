@@ -9,11 +9,14 @@ import java.util.Date;
 public class Message {
 
     private String content;
-    private String user;
+    private String username;
+    private String imagePath;
     private long time;
 
-    public Message(String content) {
+
+    public Message(String content, String username) {
         this.content = content;
+        this.username = username;
 
         time = new Date().getTime();
     }
@@ -26,16 +29,20 @@ public class Message {
         this.content = content;
     }
 
-    public void setUser(String user) {
-        this.user = user;
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getImagePath() {
+        return imagePath;
     }
 
     public String getContent() {
         return content;
     }
 
-    public String getUser() {
-        return user;
+    public String getUsername() {
+        return username;
     }
 
     public long getTime() {

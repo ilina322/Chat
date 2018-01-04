@@ -38,23 +38,29 @@ public class SignInActivity extends AppCompatActivity {
         mDatabase = FirebaseDatabase.getInstance().getReference().child("Users");
     }
 
-    public void signIn(View view){
+    public void signIn(View view) {
         final String USERNAME_CONTENT, PASSWORD_CONTENT, EMAIL_CONTENT;
         USERNAME_CONTENT = username.getText().toString().trim();
         PASSWORD_CONTENT = password.getText().toString().trim();
         EMAIL_CONTENT = email.getText().toString().trim();
 
-        if(!TextUtils.isEmpty(USERNAME_CONTENT) && !TextUtils.isEmpty(PASSWORD_CONTENT) && !TextUtils.isEmpty(EMAIL_CONTENT)){
+        if (!TextUtils.isEmpty(USERNAME_CONTENT) && !TextUtils.isEmpty(PASSWORD_CONTENT) && !TextUtils.isEmpty(EMAIL_CONTENT)) {
             mAuth.createUserWithEmailAndPassword(EMAIL_CONTENT, PASSWORD_CONTENT).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                 @Override
                 public void onComplete(@NonNull Task<AuthResult> task) {
-                    String user_id = mAuth.getCurrentUser().getUid();
-                    DatabaseReference curr_user_database = mDatabase.child(user_id);
-                    curr_user_database.child("Userame").setValue(USERNAME_CONTENT);
-                    Log.v("SignInActivity", "signed in");
-                   // startActivity(new Intent(SignInActivity.this, LogInActivity.class));
+                            if(task.isSuccessful()) {
+                                String user_id = mAuth.getCurrentUser().getUid();
+                                DatabaseReference curr_user_database = mDatabase.child(user_id);
+                                curr_user_database.child("Username").setValue(USERNAME_CONTENT);
+                                Log.v("SignInActivity", "sign in successful");
+                                startActivity(new Intent(SignInActivity.this, LogInActivity.class));
+                    };
                 }
             });
         }
+    }
+
+    public void openLogIn(View view){
+        startActivity(new Intent(SignInActivity.this, LogInActivity.class));
     }
 }

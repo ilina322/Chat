@@ -19,11 +19,15 @@ import android.widget.Toast;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -35,11 +39,14 @@ public class MainActivity extends AppCompatActivity {
     private EditText messageText;
     private FloatingActionButton mImgButton;
     private StorageReference mStorage;
-    private DatabaseReference mDatabase;
+    private DatabaseReference mDatabaseMessages;
+    private DatabaseReference mDatabaseUsers;
+    private FirebaseUser mCurrUser;
     private RecyclerView mMessageList;
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
     private static final int GALLERY_INTENT = 2;
+    private Uri downloadUri;
 
 
     @Override
@@ -47,10 +54,11 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+
         mStorage = FirebaseStorage.getInstance().getReference();
         mImgButton = (FloatingActionButton) findViewById(R.id.img_fab);
         messageText = (EditText) findViewById(R.id.message_text);
-        mDatabase = FirebaseDatabase.getInstance().getReference().child("Messages");
+        mDatabaseMessages = FirebaseDatabase.getInstance().getReference().child("Messages");
         mMessageList = (RecyclerView) findViewById(R.id.rec_view);
         mMessageList.setHasFixedSize(true);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
@@ -60,8 +68,8 @@ public class MainActivity extends AppCompatActivity {
         mAuthListener = new FirebaseAuth.AuthStateListener() {
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-                if(firebaseAuth.getCurrentUser() == null){
-                    startActivity(new Intent(MainActivity.this, SignInActivity.class));
+                if (firebaseAuth.getCurrentUser() == null) {
+                    startActivity(new Intent(MainActivity.this, LogInActivity.class));
                 }
             }
         };
@@ -76,11 +84,35 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    public void sendMessage(View view){
+
+    public void sendMessage(View view) {
         final String messageValue = messageText.getText().toString().trim();
-        if(!TextUtils.isEmpty(messageValue)){
-            final DatabaseReference newPost = mDatabase.push();
-            newPost.child("content").setValue(messageValue);
+
+        mCurrUser = mAuth.getCurrentUser();
+        mDatabaseUsers = FirebaseDatabase.getInstance().getReference().child("Users").child(mCurrUser.getUid());
+
+        if (!TextUtils.isEmpty(messageValue)) {
+            final DatabaseReference NEW_POST = mDatabaseMessages.push();
+            mDatabaseUsers.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    Log.v("MainActivity",dataSnapshot.child("Username").getValue().toString());
+                    final String USERNAME = dataSnapshot.child("Username").getValue().toString();
+                    NEW_POST.child("content").setValue(messageValue);
+                    if(downloadUri != null) {
+                        NEW_POST.child("imagePath").setValue(downloadUri.toString());
+                        downloadUri = null;
+                    }
+                    NEW_POST.child("username").setValue(USERNAME);
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+
+            mMessageList.scrollToPosition(mMessageList.getAdapter().getItemCount());
         }
     }
 
@@ -88,17 +120,24 @@ public class MainActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if(requestCode == GALLERY_INTENT && resultCode == RESULT_OK){
+        if (requestCode == GALLERY_INTENT && resultCode == RESULT_OK) {
             Uri uri = data.getData();
             StorageReference filepath = mStorage.child("Photos").child(uri.getLastPathSegment());
 
             filepath.putFile(uri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                 @Override
                 public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                    Log.v("Main Activity", "image uploaded to storage");
+                    showPicture(taskSnapshot);
+                    downloadUri = taskSnapshot.getDownloadUrl();
+                    Log.v("MainActivity", downloadUri.toString());
+                    Toast.makeText(MainActivity.this, "Upload finished", Toast.LENGTH_LONG).show();
                 }
             });
         }
+    }
+
+    private void showPicture(UploadTask.TaskSnapshot taskSnapshot) {
+
     }
 
     @Override
@@ -109,15 +148,22 @@ public class MainActivity extends AppCompatActivity {
                 Message.class,
                 R.layout.message_layout,
                 MessageViewHolder.class,
-                mDatabase
+                mDatabaseMessages
         ) {
             @Override
             protected void populateViewHolder(MessageViewHolder viewHolder, Message msg, int position) {
                 viewHolder.setContent(msg.getContent());
+                viewHolder.setImage(MainActivity.this, msg.getImagePath());
+                viewHolder.setUsername(msg.getUsername());
                 viewHolder.setTime(new Date().getTime());
             }
         };
 
         mMessageList.setAdapter(adapter);
+    }
+
+
+    public void signOut(View view) {
+        startActivity(new Intent(MainActivity.this, LogInActivity.class));
     }
 }
