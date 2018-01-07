@@ -10,6 +10,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -54,7 +55,9 @@ public class SignInActivity extends AppCompatActivity {
                                 curr_user_database.child("Username").setValue(USERNAME_CONTENT);
                                 Log.v("SignInActivity", "sign in successful");
                                 startActivity(new Intent(SignInActivity.this, LogInActivity.class));
-                    };
+                    } else {
+                                Toast.makeText(SignInActivity.this, "invalid username/password", Toast.LENGTH_LONG).show();
+                            };
                 }
             });
         }

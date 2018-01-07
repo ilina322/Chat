@@ -55,6 +55,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
 
+        downloadUri = null;
         mStorage = FirebaseStorage.getInstance().getReference();
         mImgButton = (FloatingActionButton) findViewById(R.id.img_fab);
         messageText = (EditText) findViewById(R.id.message_text);
@@ -91,7 +92,7 @@ public class MainActivity extends AppCompatActivity {
         mCurrUser = mAuth.getCurrentUser();
         mDatabaseUsers = FirebaseDatabase.getInstance().getReference().child("Users").child(mCurrUser.getUid());
 
-        if (!TextUtils.isEmpty(messageValue)) {
+        if (!TextUtils.isEmpty(messageValue) || downloadUri != null) {
             final DatabaseReference NEW_POST = mDatabaseMessages.push();
             mDatabaseUsers.addValueEventListener(new ValueEventListener() {
                 @Override
@@ -127,18 +128,15 @@ public class MainActivity extends AppCompatActivity {
             filepath.putFile(uri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                 @Override
                 public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                    showPicture(taskSnapshot);
                     downloadUri = taskSnapshot.getDownloadUrl();
                     Log.v("MainActivity", downloadUri.toString());
                     Toast.makeText(MainActivity.this, "Upload finished", Toast.LENGTH_LONG).show();
+                    sendMessage(findViewById(R.id.img_fab));
                 }
             });
         }
     }
 
-    private void showPicture(UploadTask.TaskSnapshot taskSnapshot) {
-
-    }
 
     @Override
     protected void onStart() {
