@@ -14,6 +14,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ListAdapter;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
@@ -36,6 +37,7 @@ import java.util.Date;
 
 public class MainActivity extends AppCompatActivity {
 
+    private TextView messageTextContent;
     private EditText messageText;
     private FloatingActionButton mImgButton;
     private StorageReference mStorage;
@@ -56,6 +58,7 @@ public class MainActivity extends AppCompatActivity {
 
 
         downloadUri = null;
+        messageTextContent = findViewById(R.id.message);
         mStorage = FirebaseStorage.getInstance().getReference();
         mImgButton = (FloatingActionButton) findViewById(R.id.img_fab);
         messageText = (EditText) findViewById(R.id.message_text);
@@ -93,6 +96,9 @@ public class MainActivity extends AppCompatActivity {
         mDatabaseUsers = FirebaseDatabase.getInstance().getReference().child("Users").child(mCurrUser.getUid());
 
         if (!TextUtils.isEmpty(messageValue) || downloadUri != null) {
+//            if(TextUtils.isEmpty(messageValue)){
+//                messageTextContent.setVisibility(View.INVISIBLE);
+//            }
             final DatabaseReference NEW_POST = mDatabaseMessages.push();
             mDatabaseUsers.addValueEventListener(new ValueEventListener() {
                 @Override
