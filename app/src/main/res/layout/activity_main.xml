@@ -10,16 +10,32 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
-        android:text="sign out"
-        android:onClick="signOut"/>
+        android:onClick="signOut"
+        android:text="sign out" />
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/rec_view"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
+    <LinearLayout
+        android:orientation="vertical"
         android:layout_above="@id/fab"
-        android:layout_alignParentTop="true"
-        android:dividerHeight="8dp"></android.support.v7.widget.RecyclerView>
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <android.support.v7.widget.RecyclerView
+            android:layout_weight="3"
+            android:id="@+id/admin_rec_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_alignParentTop="true"
+            android:dividerHeight="8dp"></android.support.v7.widget.RecyclerView>
+
+
+        <android.support.v7.widget.RecyclerView
+            android:layout_weight="1"
+            android:id="@+id/rec_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_alignParentTop="true"
+            android:dividerHeight="8dp"></android.support.v7.widget.RecyclerView>
+    </LinearLayout>
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fab"
@@ -29,10 +45,9 @@
         android:layout_alignParentRight="true"
         android:layout_marginBottom="16dp"
         android:layout_marginRight="16dp"
+        android:onClick="sendMessage"
         app:elevation="6dp"
         app:fabSize="normal"
-        app:pressedTranslationZ="12dp"
-        android:onClick="sendMessage"
 
         />
 
@@ -40,14 +55,14 @@
         android:id="@+id/img_fab"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_above="@id/fab"
-        android:layout_alignParentRight="true"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
         android:layout_marginBottom="16dp"
-        android:layout_marginRight="20dp"
+        android:layout_marginLeft="16dp"
+        android:onClick="sendMessage"
         app:elevation="6dp"
         app:fabSize="mini"
         app:pressedTranslationZ="12dp"
-        android:onClick="sendMessage"
 
         />
 
@@ -57,7 +72,8 @@
         android:layout_alignParentBottom="true"
         android:layout_marginBottom="16dp"
         android:layout_marginLeft="8dp"
-        android:layout_toLeftOf="@id/fab">
+        android:layout_toLeftOf="@id/fab"
+        android:layout_toRightOf="@id/img_fab">
 
         <EditText
             android:id="@+id/message_text"
@@ -67,7 +83,6 @@
             android:textSize="25sp" />
 
     </android.support.design.widget.TextInputLayout>
-
 
 
 </RelativeLayout>

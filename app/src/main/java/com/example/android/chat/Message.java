@@ -12,6 +12,7 @@ public class Message {
     private String username;
     private String imagePath;
     private long time;
+    private boolean isSentByAdmin;
 
 
     public Message(String content, String username) {
@@ -48,4 +49,6 @@ public class Message {
     public long getTime() {
         return time;
     }
+
+    public boolean isSentByAdmin() {return isSentByAdmin;}
 }

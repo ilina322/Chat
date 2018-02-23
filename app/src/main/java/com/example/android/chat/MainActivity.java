@@ -28,6 +28,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
@@ -45,6 +46,7 @@ public class MainActivity extends AppCompatActivity {
     private DatabaseReference mDatabaseUsers;
     private FirebaseUser mCurrUser;
     private RecyclerView mMessageList;
+    private RecyclerView mAdminMessageList;
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
     private static final int GALLERY_INTENT = 2;
@@ -64,10 +66,12 @@ public class MainActivity extends AppCompatActivity {
         messageText = (EditText) findViewById(R.id.message_text);
         mDatabaseMessages = FirebaseDatabase.getInstance().getReference().child("Messages");
         mMessageList = (RecyclerView) findViewById(R.id.rec_view);
+        mAdminMessageList = (RecyclerView) findViewById(R.id.admin_rec_view);
         mMessageList.setHasFixedSize(true);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         linearLayoutManager.setStackFromEnd(true);
         mMessageList.setLayoutManager(linearLayoutManager);
+        mAdminMessageList.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL,false));
         mAuth = FirebaseAuth.getInstance();
         mAuthListener = new FirebaseAuth.AuthStateListener() {
             @Override
@@ -96,17 +100,21 @@ public class MainActivity extends AppCompatActivity {
         mDatabaseUsers = FirebaseDatabase.getInstance().getReference().child("Users").child(mCurrUser.getUid());
 
         if (!TextUtils.isEmpty(messageValue) || downloadUri != null) {
-//            if(TextUtils.isEmpty(messageValue)){
-//                messageTextContent.setVisibility(View.INVISIBLE);
-//            }
             final DatabaseReference NEW_POST = mDatabaseMessages.push();
             mDatabaseUsers.addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
-                    Log.v("MainActivity",dataSnapshot.child("Username").getValue().toString());
+                    Object isAdminRaw = dataSnapshot.child("isAdmin").getValue();
+                    Log.v("MainActivity", dataSnapshot.child("Username").getValue().toString());
                     final String USERNAME = dataSnapshot.child("Username").getValue().toString();
+                    if (isAdminRaw != null) {
+                        boolean isAdmin = Integer.parseInt(isAdminRaw.toString()) == 1;
+                        NEW_POST.child("isSentByAdmin").setValue(isAdmin);
+                    } else{
+                        NEW_POST.child("isSentByAdmin").setValue(false);
+                    }
                     NEW_POST.child("content").setValue(messageValue);
-                    if(downloadUri != null) {
+                    if (downloadUri != null) {
                         NEW_POST.child("imagePath").setValue(downloadUri.toString());
                         downloadUri = null;
                     }
@@ -148,11 +156,17 @@ public class MainActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         mAuth.addAuthStateListener(mAuthListener);
+        setUserRecyclerViewData();
+        setAdminRecyclerViewData();
+    }
+
+    private void setUserRecyclerViewData() {
+        Query databaseMessagesOnlyUser = mDatabaseMessages.orderByChild("isSentByAdmin").equalTo(false);
         FirebaseRecyclerAdapter<Message, MessageViewHolder> adapter = new FirebaseRecyclerAdapter<Message, MessageViewHolder>(
                 Message.class,
                 R.layout.message_layout,
                 MessageViewHolder.class,
-                mDatabaseMessages
+                databaseMessagesOnlyUser
         ) {
             @Override
             protected void populateViewHolder(MessageViewHolder viewHolder, Message msg, int position) {
@@ -164,6 +178,26 @@ public class MainActivity extends AppCompatActivity {
         };
 
         mMessageList.setAdapter(adapter);
+    }
+
+    private void setAdminRecyclerViewData() {
+        Query databaseMessagesOnlyAdmin = mDatabaseMessages.orderByChild("isSentByAdmin").equalTo(true);
+        FirebaseRecyclerAdapter<Message, MessageViewHolder> adapter = new FirebaseRecyclerAdapter<Message, MessageViewHolder>(
+                Message.class,
+                R.layout.admin_message_layout,
+                MessageViewHolder.class,
+                databaseMessagesOnlyAdmin
+        ) {
+            @Override
+            protected void populateViewHolder(MessageViewHolder viewHolder, Message msg, int position) {
+                viewHolder.setContent(msg.getContent());
+                viewHolder.setImage(MainActivity.this, msg.getImagePath());
+                viewHolder.setUsername(msg.getUsername());
+                viewHolder.setTime(new Date().getTime());
+            }
+        };
+
+        mAdminMessageList.setAdapter(adapter);
     }
 
 
