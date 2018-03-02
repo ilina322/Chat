@@ -46,16 +46,37 @@ public class FirebaseHelper {
     }
 
     public String getUserId(){
+        if(firebaseAuth.getCurrentUser() == null){
+            return null;
+        }
         return firebaseAuth.getCurrentUser().getUid();
+    }
+
+    public void signOut() {
+        firebaseAuth.signOut();
+    }
+
+
+    public void setUsername(String username){
+        DatabaseReference curr_user_database = usersReference.child(getUserId());
+        curr_user_database.child(FIELD_USERNAME).setValue(username);
+    }
+
+    public void loginUser(String login_email_content, String login_password_content, final OnResultListener onResultListener) {
+        firebaseAuth.signInWithEmailAndPassword(login_email_content, login_password_content).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+            @Override
+            public void onComplete(@NonNull Task<AuthResult> task) {
+                if (task.isSuccessful()) {
+                    onResultListener.onSuccess();
+                } else {
+                    onResultListener.onError();
+                }
+            }
+        });
     }
 
     public interface OnResultListener{
         void onSuccess();
         void onError();
-    }
-
-    public void setUsername(String username){
-        DatabaseReference curr_user_database = usersReference.child(getUserId());
-        curr_user_database.child(FIELD_USERNAME).setValue(username);
     }
 }

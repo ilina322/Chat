@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Chat</string>
+    <string name="google_sign_in">google sign in</string>
 </resources>

@@ -7,15 +7,15 @@
     tools:context="com.example.android.chat.MainActivity">
 
     <Button
+        android:background="@android:color/transparent"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
-        android:onClick="signOut"
+        android:id="@+id/btn_signout"
         android:text="sign out" />
 
     <LinearLayout
         android:orientation="vertical"
-        android:layout_above="@id/fab"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
@@ -37,52 +37,53 @@
             android:dividerHeight="8dp"></android.support.v7.widget.RecyclerView>
     </LinearLayout>
 
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/fab"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+    <LinearLayout
         android:layout_alignParentBottom="true"
-        android:layout_alignParentRight="true"
-        android:layout_marginBottom="16dp"
-        android:layout_marginRight="16dp"
-        android:onClick="sendMessage"
-        app:elevation="6dp"
-        app:fabSize="normal"
-
-        />
-
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/img_fab"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentLeft="true"
-        android:layout_marginBottom="16dp"
-        android:layout_marginLeft="16dp"
-        android:onClick="sendMessage"
-        app:elevation="6dp"
-        app:fabSize="mini"
-        app:pressedTranslationZ="12dp"
-
-        />
-
-    <android.support.design.widget.TextInputLayout
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_marginBottom="16dp"
-        android:layout_marginLeft="8dp"
-        android:layout_toLeftOf="@id/fab"
-        android:layout_toRightOf="@id/img_fab">
+        android:layout_height="wrap_content">
 
-        <EditText
-            android:id="@+id/message_text"
-            android:layout_width="match_parent"
+        <Button
+            android:text="text"
+            android:id="@+id/message_button"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:hint="Message"
-            android:textSize="25sp" />
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentRight="true"
+            android:onClick="sendMessage"
 
-    </android.support.design.widget.TextInputLayout>
+            />
+
+
+        <android.support.design.widget.TextInputLayout
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="16dp"
+            android:layout_marginLeft="8dp">
+
+            <EditText
+                android:id="@+id/message_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Message"
+                android:textSize="25sp" />
+
+        </android.support.design.widget.TextInputLayout>
+
+        <Button
+            android:text="IMG"
+            android:id="@+id/image_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="sendMessage"
+
+            />
+
+
+    </LinearLayout>
 
 
 </RelativeLayout>

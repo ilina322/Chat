@@ -12,6 +12,7 @@ import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListAdapter;
 import android.widget.TextView;
@@ -36,11 +37,14 @@ import com.google.firebase.storage.UploadTask;
 
 import java.util.Date;
 
+import butterknife.ButterKnife;
+import butterknife.OnClick;
+
 public class MainActivity extends AppCompatActivity {
 
     private TextView messageTextContent;
     private EditText messageText;
-    private FloatingActionButton mImgButton;
+    private Button mImgButton;
     private StorageReference mStorage;
     private DatabaseReference mDatabaseMessages;
     private DatabaseReference mDatabaseUsers;
@@ -57,12 +61,12 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        ButterKnife.bind(this);
 
         downloadUri = null;
         messageTextContent = findViewById(R.id.message);
         mStorage = FirebaseStorage.getInstance().getReference();
-        mImgButton = (FloatingActionButton) findViewById(R.id.img_fab);
+        mImgButton = (Button) findViewById(R.id.image_button);
         messageText = (EditText) findViewById(R.id.message_text);
         mDatabaseMessages = FirebaseDatabase.getInstance().getReference().child("Messages");
         mMessageList = (RecyclerView) findViewById(R.id.rec_view);
@@ -138,14 +142,13 @@ public class MainActivity extends AppCompatActivity {
         if (requestCode == GALLERY_INTENT && resultCode == RESULT_OK) {
             Uri uri = data.getData();
             StorageReference filepath = mStorage.child("Photos").child(uri.getLastPathSegment());
-
             filepath.putFile(uri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                 @Override
                 public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                     downloadUri = taskSnapshot.getDownloadUrl();
                     Log.v("MainActivity", downloadUri.toString());
                     Toast.makeText(MainActivity.this, "Upload finished", Toast.LENGTH_LONG).show();
-                    sendMessage(findViewById(R.id.img_fab));
+                    sendMessage(findViewById(R.id.image_button));
                 }
             });
         }
@@ -200,8 +203,10 @@ public class MainActivity extends AppCompatActivity {
         mAdminMessageList.setAdapter(adapter);
     }
 
-
-    public void signOut(View view) {
+    @OnClick(R.id.btn_signout)
+    public void signOut() {
+        FirebaseHelper.getInstance().signOut();
         startActivity(new Intent(MainActivity.this, LogInActivity.class));
+        finish();
     }
 }

@@ -4,24 +4,30 @@
     android:background="@color/colorPrimary"
     xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
     android:layout_height="match_parent">
+
+    <ImageView
+        android:layout_above="@id/login_form"
+        android:layout_margin="16dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:src="@drawable/login"/>
+
     <LinearLayout
         android:layout_marginLeft="16dp"
         android:layout_marginRight="16dp"
         android:layout_centerInParent="true"
         android:orientation="vertical"
-        android:layout_marginTop="70dp"
         android:background="#ffffff"
         android:id="@+id/login_form"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center">
+        android:layout_height="wrap_content">
+
 
         <android.support.design.widget.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
-            android:layout_margin="12dp"
-            android:layout_toLeftOf="@id/fab">
+            android:layout_margin="12dp">
 
             <EditText
                 android:id="@+id/email_login"
@@ -35,8 +41,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
-            android:layout_margin="12dp"
-            android:layout_toLeftOf="@id/fab">
+            android:layout_margin="12dp">
 
             <EditText
                 android:id="@+id/password_login"
@@ -48,25 +53,40 @@
         </android.support.design.widget.TextInputLayout>
 
         <Button
+            android:layout_margin="8dp"
             android:id="@+id/login_btn"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
             android:layout_below="@id/login_form"
+            android:fontFamily="serif-monospace"
+            android:textStyle="bold"
+            android:textColor="#fff"
             android:background="@drawable/selector_button"
             android:layout_marginTop="16dp"
-            android:text="go"
+            android:text="let's go"
             android:onClick="logIn"/>
     </LinearLayout>
 
+    <TextView
+        android:id="@+id/alertTitleLogin"
+        android:layout_margin="10dp"
+        android:layout_below="@id/login_form"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="new to GossipPal?"
+        android:layout_centerHorizontal="true"/>
 
 
     <Button
+        android:background="@android:color/transparent"
+        android:id="@+id/signin_btn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_below="@id/alertTitleLogin"
         android:layout_centerHorizontal="true"
-        android:layout_below="@id/login_form"
-        android:text="sign in"
-        android:onClick="openSignIn"/>
+        android:layout_marginBottom="12dp"
+        android:onClick="openSignIn"
+        android:text="sign in" />
 
 </RelativeLayout>
