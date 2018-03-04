@@ -1,4 +1,9 @@
 <resources>
     <string name="app_name">Chat</string>
-    <string name="google_sign_in">google sign in</string>
+    <string name="google_sign_in">sign in with google</string>
+    <string name="already_have_an_account">Already have an account?</string>
+    <string name="log_in">log in</string>
+    <string name="sign_out">sign out</string>
+    <string name="sign_in_with_google">sign in with google</string>
+    <string name="sign_in_with_email">sign in with email</string>
 </resources>

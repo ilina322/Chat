@@ -3,8 +3,6 @@ package com.example.android.chat;
 import android.content.Intent;
 import android.net.Uri;
 import android.support.annotation.NonNull;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.TextInputEditText;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -14,28 +12,20 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ListAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.firebase.ui.database.FirebaseRecyclerAdapter;
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
-
-import java.util.Date;
 
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -46,15 +36,17 @@ public class MainActivity extends AppCompatActivity {
     private EditText messageText;
     private Button mImgButton;
     private StorageReference mStorage;
-    private DatabaseReference mDatabaseMessages;
-    private DatabaseReference mDatabaseUsers;
-    private FirebaseUser mCurrUser;
-    private RecyclerView mMessageList;
+    private RecyclerView mUserMessageList;
     private RecyclerView mAdminMessageList;
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
     private static final int GALLERY_INTENT = 2;
     private Uri downloadUri;
+
+
+    private DatabaseReference mDatabaseMessages;
+    private DatabaseReference mDatabaseUsers;
+    private FirebaseUser mCurrUser;
 
 
     @Override
@@ -63,19 +55,19 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
 
+        mDatabaseMessages = FirebaseDatabase.getInstance().getReference().child("Messages");
+
         downloadUri = null;
         messageTextContent = findViewById(R.id.message);
-        mStorage = FirebaseStorage.getInstance().getReference();
         mImgButton = (Button) findViewById(R.id.image_button);
         messageText = (EditText) findViewById(R.id.message_text);
-        mDatabaseMessages = FirebaseDatabase.getInstance().getReference().child("Messages");
-        mMessageList = (RecyclerView) findViewById(R.id.rec_view);
+        mUserMessageList = (RecyclerView) findViewById(R.id.rec_view);
         mAdminMessageList = (RecyclerView) findViewById(R.id.admin_rec_view);
-        mMessageList.setHasFixedSize(true);
+        mUserMessageList.setHasFixedSize(true);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         linearLayoutManager.setStackFromEnd(true);
-        mMessageList.setLayoutManager(linearLayoutManager);
-        mAdminMessageList.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL,false));
+        mUserMessageList.setLayoutManager(linearLayoutManager);
+        mAdminMessageList.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
         mAuth = FirebaseAuth.getInstance();
         mAuthListener = new FirebaseAuth.AuthStateListener() {
             @Override
@@ -100,40 +92,20 @@ public class MainActivity extends AppCompatActivity {
     public void sendMessage(View view) {
         final String messageValue = messageText.getText().toString().trim();
 
-        mCurrUser = mAuth.getCurrentUser();
-        mDatabaseUsers = FirebaseDatabase.getInstance().getReference().child("Users").child(mCurrUser.getUid());
+        FirebaseHelper.getInstance().sendMessage(messageValue, new FirebaseHelper.OnResultListener() {
+            @Override
+            public void onSuccess() {
+                messageText.setText("");
+            }
 
-        if (!TextUtils.isEmpty(messageValue) || downloadUri != null) {
-            final DatabaseReference NEW_POST = mDatabaseMessages.push();
-            mDatabaseUsers.addValueEventListener(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                    Object isAdminRaw = dataSnapshot.child("isAdmin").getValue();
-                    Log.v("MainActivity", dataSnapshot.child("Username").getValue().toString());
-                    final String USERNAME = dataSnapshot.child("Username").getValue().toString();
-                    if (isAdminRaw != null) {
-                        boolean isAdmin = Integer.parseInt(isAdminRaw.toString()) == 1;
-                        NEW_POST.child("isSentByAdmin").setValue(isAdmin);
-                    } else{
-                        NEW_POST.child("isSentByAdmin").setValue(false);
-                    }
-                    NEW_POST.child("content").setValue(messageValue);
-                    if (downloadUri != null) {
-                        NEW_POST.child("imagePath").setValue(downloadUri.toString());
-                        downloadUri = null;
-                    }
-                    NEW_POST.child("username").setValue(USERNAME);
-                }
+            @Override
+            public void onError() {
 
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
+            }
+        });
 
-                }
-            });
-
-            mMessageList.scrollToPosition(mMessageList.getAdapter().getItemCount());
-        }
     }
+
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -141,14 +113,15 @@ public class MainActivity extends AppCompatActivity {
 
         if (requestCode == GALLERY_INTENT && resultCode == RESULT_OK) {
             Uri uri = data.getData();
-            StorageReference filepath = mStorage.child("Photos").child(uri.getLastPathSegment());
-            filepath.putFile(uri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+            FirebaseHelper.getInstance().sendMessageWithPhoto(uri, messageText.getText().toString().trim(), new FirebaseHelper.OnResultListener() {
                 @Override
-                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                    downloadUri = taskSnapshot.getDownloadUrl();
-                    Log.v("MainActivity", downloadUri.toString());
-                    Toast.makeText(MainActivity.this, "Upload finished", Toast.LENGTH_LONG).show();
-                    sendMessage(findViewById(R.id.image_button));
+                public void onSuccess() {
+                    messageText.setText("");
+                }
+
+                @Override
+                public void onError() {
+
                 }
             });
         }
@@ -159,49 +132,10 @@ public class MainActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         mAuth.addAuthStateListener(mAuthListener);
-        setUserRecyclerViewData();
-        setAdminRecyclerViewData();
+        FirebaseHelper.getInstance().setUserRecyclerViewData(this, mUserMessageList);
+        FirebaseHelper.getInstance().setAdminRecyclerViewData(this, mAdminMessageList);
     }
 
-    private void setUserRecyclerViewData() {
-        Query databaseMessagesOnlyUser = mDatabaseMessages.orderByChild("isSentByAdmin").equalTo(false);
-        FirebaseRecyclerAdapter<Message, MessageViewHolder> adapter = new FirebaseRecyclerAdapter<Message, MessageViewHolder>(
-                Message.class,
-                R.layout.message_layout,
-                MessageViewHolder.class,
-                databaseMessagesOnlyUser
-        ) {
-            @Override
-            protected void populateViewHolder(MessageViewHolder viewHolder, Message msg, int position) {
-                viewHolder.setContent(msg.getContent());
-                viewHolder.setImage(MainActivity.this, msg.getImagePath());
-                viewHolder.setUsername(msg.getUsername());
-                viewHolder.setTime(new Date().getTime());
-            }
-        };
-
-        mMessageList.setAdapter(adapter);
-    }
-
-    private void setAdminRecyclerViewData() {
-        Query databaseMessagesOnlyAdmin = mDatabaseMessages.orderByChild("isSentByAdmin").equalTo(true);
-        FirebaseRecyclerAdapter<Message, MessageViewHolder> adapter = new FirebaseRecyclerAdapter<Message, MessageViewHolder>(
-                Message.class,
-                R.layout.admin_message_layout,
-                MessageViewHolder.class,
-                databaseMessagesOnlyAdmin
-        ) {
-            @Override
-            protected void populateViewHolder(MessageViewHolder viewHolder, Message msg, int position) {
-                viewHolder.setContent(msg.getContent());
-                viewHolder.setImage(MainActivity.this, msg.getImagePath());
-                viewHolder.setUsername(msg.getUsername());
-                viewHolder.setTime(new Date().getTime());
-            }
-        };
-
-        mAdminMessageList.setAdapter(adapter);
-    }
 
     @OnClick(R.id.btn_signout)
     public void signOut() {

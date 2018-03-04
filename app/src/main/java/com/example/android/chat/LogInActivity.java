@@ -3,9 +3,6 @@ package com.example.android.chat;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.PersistableBundle;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.util.Log;
@@ -13,15 +10,15 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+
+import butterknife.ButterKnife;
+import butterknife.OnClick;
 
 public class LogInActivity extends AppCompatActivity {
 
@@ -33,6 +30,7 @@ public class LogInActivity extends AppCompatActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+        ButterKnife.bind(this);
 
         email = (EditText) findViewById(R.id.email_login);
         password = (EditText) findViewById(R.id.password_login);
@@ -58,7 +56,7 @@ public class LogInActivity extends AppCompatActivity {
 
                 @Override
                 public void onError() {
-
+                    Toast.makeText(LogInActivity.this, "invalid username/password", Toast.LENGTH_LONG).show();
                 }
             });
         }
@@ -72,8 +70,6 @@ public class LogInActivity extends AppCompatActivity {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if (dataSnapshot.hasChild(user_id)) {
                     openMain();
-                } else{
-                    Toast.makeText(LogInActivity.this, "invalid username/password", Toast.LENGTH_LONG).show();
                 }
             }
 
@@ -90,6 +86,11 @@ public class LogInActivity extends AppCompatActivity {
 
     public void openMain(){
         startActivity(new Intent(LogInActivity.this, MainActivity.class));
+    }
+
+    @OnClick(R.id.signin_btn)
+    public void openGoogleSignin(View view){
+        startActivity(new Intent(LogInActivity.this, GoogleSigninActivity.class));
     }
 
 

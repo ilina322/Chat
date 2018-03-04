@@ -64,7 +64,7 @@ public class AuthenticationHelper {
         }
     }
 
-    private void firebaseAuthWithGoogle(GoogleSignInAccount acct, final OnResultListener listener) {
+    private void firebaseAuthWithGoogle(final GoogleSignInAccount acct, final OnResultListener listener) {
         Log.d(TAG, "firebaseAuthWithGoogle:" + acct.getId());
 
         AuthCredential credential = GoogleAuthProvider.getCredential(acct.getIdToken(), null);
@@ -76,6 +76,7 @@ public class AuthenticationHelper {
                             // Sign in success, update UI with the signed-in user's information
                             Log.d(TAG, "signInWithCredential:success");
                             FirebaseUser user = mAuth.getCurrentUser();
+                            FirebaseHelper.getInstance().setUsername(acct.getDisplayName());
                             listener.onSuccess();
                         } else {
                             // If sign in fails, display a message to the user.

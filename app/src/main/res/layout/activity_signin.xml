@@ -14,6 +14,7 @@
         android:src="@drawable/signin" />
 
     <LinearLayout
+        android:gravity="center_horizontal"
         android:id="@+id/reg_form"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -21,7 +22,7 @@
         android:layout_centerInParent="true"
         android:layout_marginLeft="16dp"
         android:layout_marginRight="16dp"
-        android:background="#FFFF"
+        android:background="@drawable/form_background"
         android:orientation="vertical">
 
 
@@ -30,15 +31,16 @@
 
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
-            android:layout_margin="12dp"
-            android:layout_marginTop="30dp">
+            android:layout_marginLeft="12dp"
+            android:layout_marginRight="12dp"
+            android:layout_marginTop="16dp">
 
             <EditText
                 android:id="@+id/username_signin"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="Username"
-                android:textSize="20sp" />
+                android:textSize="18sp" />
 
         </android.support.design.widget.TextInputLayout>
 
@@ -46,14 +48,15 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
-            android:layout_margin="12dp">
+            android:layout_marginLeft="12dp"
+            android:layout_marginRight="12dp">
 
             <EditText
                 android:id="@+id/email_signin"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="Email"
-                android:textSize="20sp" />
+                android:textSize="18sp" />
 
         </android.support.design.widget.TextInputLayout>
 
@@ -61,21 +64,23 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
-            android:layout_margin="12dp">
+            android:layout_marginLeft="12dp"
+            android:layout_marginRight="12dp">
 
             <EditText
+                android:inputType="textPassword"
                 android:id="@+id/password_signin"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="Password"
-                android:textSize="20sp" />
+                android:textSize="18sp" />
 
         </android.support.design.widget.TextInputLayout>
 
         <Button
             android:id="@+id/btn_signin"
             android:layout_width="match_parent"
-            android:layout_height="60dp"
+            android:layout_height="wrap_content"
             android:layout_below="@id/reg_form"
             android:layout_centerHorizontal="true"
             android:layout_margin="8dp"
@@ -85,18 +90,6 @@
             android:textColor="#fff"
             android:textStyle="bold" />
 
-        <Button
-            android:id="@+id/btn_google_signin"
-            android:layout_width="match_parent"
-            android:layout_height="60dp"
-            android:layout_below="@id/reg_form"
-            android:layout_centerHorizontal="true"
-            android:layout_margin="8dp"
-            android:background="@drawable/selector_button"
-            android:fontFamily="serif-monospace"
-            android:text="@string/google_sign_in"
-            android:textColor="#fff"
-            android:textStyle="bold" />
     </LinearLayout>
 
 
@@ -107,7 +100,7 @@
         android:layout_below="@id/reg_form"
         android:layout_centerHorizontal="true"
         android:layout_margin="10dp"
-        android:text="Already have an account?" />
+        android:text="@string/already_have_an_account" />
 
     <Button
         android:id="@+id/btn_login"
@@ -117,6 +110,6 @@
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="12dp"
         android:background="@android:color/transparent"
-        android:text="log in" />
+        android:text="@string/log_in" />
 
 </RelativeLayout>
