@@ -15,6 +15,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -26,6 +27,8 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+
+import java.util.Date;
 
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -41,12 +44,6 @@ public class MainActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
     private static final int GALLERY_INTENT = 2;
-    private Uri downloadUri;
-
-
-    private DatabaseReference mDatabaseMessages;
-    private DatabaseReference mDatabaseUsers;
-    private FirebaseUser mCurrUser;
 
 
     @Override
@@ -55,9 +52,6 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
 
-        mDatabaseMessages = FirebaseDatabase.getInstance().getReference().child("Messages");
-
-        downloadUri = null;
         messageTextContent = findViewById(R.id.message);
         mImgButton = (Button) findViewById(R.id.image_button);
         messageText = (EditText) findViewById(R.id.message_text);
@@ -83,6 +77,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
                 Intent intent = new Intent(Intent.ACTION_PICK);
                 intent.setType("image/*");
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivityForResult(intent, GALLERY_INTENT);
             }
         });
@@ -96,6 +91,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onSuccess() {
                 messageText.setText("");
+                mUserMessageList.scrollToPosition(mUserMessageList.getAdapter().getItemCount() - 1);
             }
 
             @Override
@@ -117,6 +113,7 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onSuccess() {
                     messageText.setText("");
+                    //set uri to null???
                 }
 
                 @Override
@@ -132,8 +129,46 @@ public class MainActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         mAuth.addAuthStateListener(mAuthListener);
-        FirebaseHelper.getInstance().setUserRecyclerViewData(this, mUserMessageList);
-        FirebaseHelper.getInstance().setAdminRecyclerViewData(this, mAdminMessageList);
+        setUpUserRecyclerView();
+        setUpAdminRecyclerView();
+    }
+
+    private void setUpAdminRecyclerView() {
+        FirebaseRecyclerAdapter<Message, MessageViewHolder> adapter = new FirebaseRecyclerAdapter<Message, MessageViewHolder>(
+                Message.class,
+                R.layout.admin_message_layout,
+                MessageViewHolder.class,
+                FirebaseHelper.getInstance().getAdminDataReference()
+        ) {
+            @Override
+            protected void populateViewHolder(MessageViewHolder viewHolder, Message msg, int position) {
+                viewHolder.setContent(msg.getContent());
+                viewHolder.setImage(MainActivity.this, msg.getImagePath());
+                viewHolder.setUsername(msg.getUsername());
+                viewHolder.setTime(new Date().getTime());
+            }
+        };
+
+        mAdminMessageList.setAdapter(adapter);
+    }
+
+    private void setUpUserRecyclerView(){
+        FirebaseRecyclerAdapter<Message, MessageViewHolder> adapter = new FirebaseRecyclerAdapter<Message, MessageViewHolder>(
+                Message.class,
+                R.layout.message_layout,
+                MessageViewHolder.class,
+                FirebaseHelper.getInstance().getUserDataReference()
+        ) {
+            @Override
+            protected void populateViewHolder(MessageViewHolder viewHolder, Message msg, int position) {
+                viewHolder.setContent(msg.getContent());
+                viewHolder.setImage(MainActivity.this, msg.getImagePath());
+                viewHolder.setUsername(msg.getUsername());
+                viewHolder.setTime(new Date().getTime());
+            }
+        };
+
+        mUserMessageList.setAdapter(adapter);
     }
 
 

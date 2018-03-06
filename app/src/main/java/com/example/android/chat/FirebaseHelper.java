@@ -59,44 +59,15 @@ public class FirebaseHelper {
         messagesDatabaseReference = FirebaseDatabase.getInstance().getReference().child(TABLE_NAME_MESSAGES);
     }
 
-    public void setUserRecyclerViewData(final Context context, RecyclerView messageList) {
+    public Query getUserDataReference() {
         Query databaseMessagesOnlyUser = messagesDatabaseReference.orderByChild("isSentByAdmin").equalTo(false);
-        FirebaseRecyclerAdapter<Message, MessageViewHolder> adapter = new FirebaseRecyclerAdapter<Message, MessageViewHolder>(
-                Message.class,
-                R.layout.message_layout,
-                MessageViewHolder.class,
-                databaseMessagesOnlyUser
-        ) {
-            @Override
-            protected void populateViewHolder(MessageViewHolder viewHolder, Message msg, int position) {
-                viewHolder.setContent(msg.getContent());
-                viewHolder.setImage(context, msg.getImagePath());
-                viewHolder.setUsername(msg.getUsername());
-                viewHolder.setTime(new Date().getTime());
-            }
-        };
+        return databaseMessagesOnlyUser;
 
-        messageList.setAdapter(adapter);
     }
 
-    public void setAdminRecyclerViewData(final Context context, RecyclerView messageList) {
+    public Query getAdminDataReference() {
         Query databaseMessagesOnlyAdmin = messagesDatabaseReference.orderByChild("isSentByAdmin").equalTo(true);
-        FirebaseRecyclerAdapter<Message, MessageViewHolder> adapter = new FirebaseRecyclerAdapter<Message, MessageViewHolder>(
-                Message.class,
-                R.layout.admin_message_layout,
-                MessageViewHolder.class,
-                databaseMessagesOnlyAdmin
-        ) {
-            @Override
-            protected void populateViewHolder(MessageViewHolder viewHolder, Message msg, int position) {
-                viewHolder.setContent(msg.getContent());
-                viewHolder.setImage(context, msg.getImagePath());
-                viewHolder.setUsername(msg.getUsername());
-                viewHolder.setTime(new Date().getTime());
-            }
-        };
-
-        messageList.setAdapter(adapter);
+        return databaseMessagesOnlyAdmin;
     }
 
     public void createUser(String email, String password, final OnResultListener listener) {
@@ -150,9 +121,7 @@ public class FirebaseHelper {
         StorageReference filepath = storage.child("Photos").child(uri.getLastPathSegment());
         filepath.putFile(uri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
             @Override
-            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                Uri downloadUri = taskSnapshot.getDownloadUrl();
-                Log.v("MainActivity", downloadUri.toString());
+            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {;
                 sendMessage(uri, messageValue, listener);
             }
         });
@@ -191,6 +160,7 @@ public class FirebaseHelper {
             });
         }
     }
+
 
     public interface OnResultListener {
         void onSuccess();
