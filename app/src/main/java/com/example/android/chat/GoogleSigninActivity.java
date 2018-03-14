@@ -20,6 +20,11 @@ public class GoogleSigninActivity extends AppCompatActivity {
     }
 
 
+    @OnClick(R.id.btn_login)
+    public void openLogin()  {
+        startActivity(new Intent(GoogleSigninActivity.this, LogInActivity.class));
+    }
+
     @OnClick(R.id.email_signin_btn)
     public void openSignin()  {
         startActivity(new Intent(GoogleSigninActivity.this, SignInActivity.class));
@@ -45,7 +50,7 @@ public class GoogleSigninActivity extends AppCompatActivity {
 
                 @Override
                 public void onError() {
-                    Snackbar.make(findViewById(R.id.reg_form), "Authentication Failed.", Snackbar.LENGTH_SHORT).show();
+                    Snackbar.make(findViewById(R.id.login_form), R.string.error_auth_failed, Snackbar.LENGTH_SHORT).show();
                 }
             });
         }

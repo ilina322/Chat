@@ -1,9 +1,17 @@
 <resources>
-    <string name="app_name">Chat</string>
+    <string name="app_name">Gossip Pal</string>
     <string name="google_sign_in">sign in with google</string>
     <string name="already_have_an_account">Already have an account?</string>
     <string name="log_in">log in</string>
     <string name="sign_out">sign out</string>
     <string name="sign_in_with_google">sign in with google</string>
     <string name="sign_in_with_email">sign in with email</string>
+    <string name="error_auth_failed">Authentication Failed.</string>
+    <string name="error_message_sent">Error sending message</string>
+    <string name="error_photo_sent">Error sending photo</string>
+    <string name="error_invalid_credentials">Invalid username/password</string>
+    <string name="sign_in">sign in</string>
+    <string name="new_to_gossippal">new to GossipPal?</string>
+    <string name="let_s_go">let\'s go</string>
+    <string name="password">Password</string>
 </resources>

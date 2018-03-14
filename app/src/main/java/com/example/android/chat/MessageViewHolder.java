@@ -45,9 +45,12 @@ public class MessageViewHolder extends RecyclerView.ViewHolder{
     }
 
     public void setImage(Context context, String path){
+        ImageView image = (ImageView) mView.findViewById(R.id.image);
         if(path != null) {
-            ImageView image = (ImageView) mView.findViewById(R.id.image);
+            image.setVisibility(View.VISIBLE);
             Picasso.with(context).load(path).into(image);
+        } else {
+            image.setVisibility(View.GONE);
         }
     }
 }

@@ -1,8 +1,12 @@
 package com.example.android.chat;
 
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.Build;
 import android.support.annotation.NonNull;
+import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -10,6 +14,7 @@ import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -30,21 +35,27 @@ import com.google.firebase.storage.UploadTask;
 
 import java.util.Date;
 
+import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
+import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
+import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
+
 public class MainActivity extends AppCompatActivity {
 
-    private TextView messageTextContent;
-    private EditText messageText;
-    private Button mImgButton;
-    private StorageReference mStorage;
-    private RecyclerView mUserMessageList;
-    private RecyclerView mAdminMessageList;
-    private FirebaseAuth mAuth;
-    private FirebaseAuth.AuthStateListener mAuthListener;
-    private static final int GALLERY_INTENT = 2;
 
+    private static final int GALLERY_INTENT = 2;
+    private static final String TAG = "MainActivity";
+
+    @BindView(R.id.grp_messages)
+    ViewGroup grpMessages;
+    @BindView(R.id.message_text)
+    EditText edtMessage;
+    @BindView(R.id.rec_view)
+    RecyclerView recViewUsers;
+    @BindView(R.id.admin_rec_view)
+    RecyclerView recViewAdmins;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,56 +63,15 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
 
-        messageTextContent = findViewById(R.id.message);
-        mImgButton = (Button) findViewById(R.id.image_button);
-        messageText = (EditText) findViewById(R.id.message_text);
-        mUserMessageList = (RecyclerView) findViewById(R.id.rec_view);
-        mAdminMessageList = (RecyclerView) findViewById(R.id.admin_rec_view);
-        mUserMessageList.setHasFixedSize(true);
-        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
-        linearLayoutManager.setStackFromEnd(true);
-        mUserMessageList.setLayoutManager(linearLayoutManager);
-        mAdminMessageList.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
-        mAuth = FirebaseAuth.getInstance();
-        mAuthListener = new FirebaseAuth.AuthStateListener() {
-            @Override
-            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-                if (firebaseAuth.getCurrentUser() == null) {
-                    startActivity(new Intent(MainActivity.this, LogInActivity.class));
-                }
-            }
-        };
+        //If no user is logged in, return to LogIn screen
+        if (FirebaseHelper.getInstance().getUserId() == null) {
+            startActivity(new Intent(this, LogInActivity.class));
+            finish();
+        }
 
-        mImgButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(Intent.ACTION_PICK);
-                intent.setType("image/*");
-                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                startActivityForResult(intent, GALLERY_INTENT);
-            }
-        });
+        setUpUserRecyclerView();
+        setUpAdminRecyclerView();
     }
-
-
-    public void sendMessage(View view) {
-        final String messageValue = messageText.getText().toString().trim();
-
-        FirebaseHelper.getInstance().sendMessage(messageValue, new FirebaseHelper.OnResultListener() {
-            @Override
-            public void onSuccess() {
-                messageText.setText("");
-                mUserMessageList.scrollToPosition(mUserMessageList.getAdapter().getItemCount() - 1);
-            }
-
-            @Override
-            public void onError() {
-
-            }
-        });
-
-    }
-
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -109,31 +79,22 @@ public class MainActivity extends AppCompatActivity {
 
         if (requestCode == GALLERY_INTENT && resultCode == RESULT_OK) {
             Uri uri = data.getData();
-            FirebaseHelper.getInstance().sendMessageWithPhoto(uri, messageText.getText().toString().trim(), new FirebaseHelper.OnResultListener() {
+            FirebaseHelper.getInstance().sendMessageWithPhoto(uri, edtMessage.getText().toString().trim(), new FirebaseHelper.OnResultListener() {
                 @Override
                 public void onSuccess() {
-                    messageText.setText("");
-                    //set uri to null???
+                    edtMessage.setText("");
                 }
 
                 @Override
                 public void onError() {
-
+                    showError(R.string.error_photo_sent);
                 }
             });
         }
     }
 
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        mAuth.addAuthStateListener(mAuthListener);
-        setUpUserRecyclerView();
-        setUpAdminRecyclerView();
-    }
-
     private void setUpAdminRecyclerView() {
+        recViewAdmins.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
         FirebaseRecyclerAdapter<Message, MessageViewHolder> adapter = new FirebaseRecyclerAdapter<Message, MessageViewHolder>(
                 Message.class,
                 R.layout.admin_message_layout,
@@ -149,10 +110,14 @@ public class MainActivity extends AppCompatActivity {
             }
         };
 
-        mAdminMessageList.setAdapter(adapter);
+        recViewAdmins.setAdapter(adapter);
     }
 
-    private void setUpUserRecyclerView(){
+    private void setUpUserRecyclerView() {
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
+        linearLayoutManager.setStackFromEnd(true);
+        recViewUsers.setHasFixedSize(true);
+        recViewUsers.setLayoutManager(linearLayoutManager);
         FirebaseRecyclerAdapter<Message, MessageViewHolder> adapter = new FirebaseRecyclerAdapter<Message, MessageViewHolder>(
                 Message.class,
                 R.layout.message_layout,
@@ -168,7 +133,7 @@ public class MainActivity extends AppCompatActivity {
             }
         };
 
-        mUserMessageList.setAdapter(adapter);
+        recViewUsers.setAdapter(adapter);
     }
 
 
@@ -177,5 +142,52 @@ public class MainActivity extends AppCompatActivity {
         FirebaseHelper.getInstance().signOut();
         startActivity(new Intent(MainActivity.this, LogInActivity.class));
         finish();
+    }
+
+    @OnClick(R.id.image_button)
+    public void onSelectImageClicked() {
+        if (checkPermissionForReadExtertalStorage()) {
+            Intent intent = new Intent(Intent.ACTION_PICK);
+            intent.setType("image/*");
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivityForResult(intent, GALLERY_INTENT);
+        } else {
+            requestPermissionForReadExtertalStorage();
+        }
+    }
+
+    public boolean checkPermissionForReadExtertalStorage() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            int result = checkSelfPermission(WRITE_EXTERNAL_STORAGE);
+            return result == PackageManager.PERMISSION_GRANTED;
+        }
+        return false;
+    }
+
+    public void requestPermissionForReadExtertalStorage() {
+        ActivityCompat.requestPermissions(this, new String[]{WRITE_EXTERNAL_STORAGE },
+                10);
+    }
+
+    @OnClick(R.id.message_button)
+    public void sendMessage(View view) {
+        final String messageValue = edtMessage.getText().toString().trim();
+
+        FirebaseHelper.getInstance().sendMessage(messageValue, new FirebaseHelper.OnResultListener() {
+            @Override
+            public void onSuccess() {
+                edtMessage.setText("");
+                recViewUsers.scrollToPosition(recViewUsers.getAdapter().getItemCount() - 1);
+            }
+
+            @Override
+            public void onError() {
+                showError(R.string.error_message_sent);
+            }
+        });
+    }
+
+    private void showError(int stringRes) {
+        Snackbar.make(grpMessages, stringRes, Snackbar.LENGTH_SHORT).show();
     }
 }

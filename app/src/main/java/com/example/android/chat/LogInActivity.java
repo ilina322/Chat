@@ -17,12 +17,14 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
 public class LogInActivity extends AppCompatActivity {
 
-    private EditText email, password;
+    @BindView(R.id.email_login) EditText email;
+    @BindView(R.id.password_login) EditText password;
     private FirebaseAuth mAuth;
     private DatabaseReference mDatabase;
 
@@ -32,8 +34,6 @@ public class LogInActivity extends AppCompatActivity {
         setContentView(R.layout.activity_login);
         ButterKnife.bind(this);
 
-        email = (EditText) findViewById(R.id.email_login);
-        password = (EditText) findViewById(R.id.password_login);
         mAuth = FirebaseAuth.getInstance();
         mDatabase = FirebaseDatabase.getInstance().getReference().child("Users");
         if(FirebaseHelper.getInstance().getUserId() != null){
@@ -41,6 +41,7 @@ public class LogInActivity extends AppCompatActivity {
         }
     }
 
+    @OnClick(R.id.login_btn)
     public void logIn(View view) {
         final String LOGIN_EMAIL_CONTENT, LOGIN_PASSWORD_CONTENT;
         LOGIN_EMAIL_CONTENT = email.getText().toString().trim();
@@ -56,7 +57,7 @@ public class LogInActivity extends AppCompatActivity {
 
                 @Override
                 public void onError() {
-                    Toast.makeText(LogInActivity.this, "invalid username/password", Toast.LENGTH_LONG).show();
+                    Toast.makeText(LogInActivity.this, R.string.error_invalid_credentials, Toast.LENGTH_LONG).show();
                 }
             });
         }
@@ -75,7 +76,7 @@ public class LogInActivity extends AppCompatActivity {
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-
+                Toast.makeText(LogInActivity.this, R.string.error_invalid_credentials, Toast.LENGTH_LONG).show();
             }
         });
     }

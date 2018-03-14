@@ -2,28 +2,12 @@ package com.example.android.chat;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
-
-import com.google.android.gms.auth.api.signin.GoogleSignIn;
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
-import com.google.android.gms.auth.api.signin.GoogleSignInClient;
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
-import com.google.android.gms.common.api.ApiException;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.AuthCredential;
-import com.google.firebase.auth.AuthResult;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.auth.GoogleAuthProvider;
-import com.google.firebase.database.DatabaseReference;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -32,6 +16,9 @@ import butterknife.OnClick;
 
 public class SignInActivity extends AppCompatActivity {
 
+    public static final String INVALID_USERNAME_PASSWORD = "invalid username/password";
+    public static final String ON_SUCCESS_MESSAGE = "sign in successful";
+    public static final String ON_ERROR_MESSAGE = "sign in error";
     private final String TAG = "SignInActivity";
 
     @BindView(R.id.email_signin)
@@ -62,17 +49,17 @@ public class SignInActivity extends AppCompatActivity {
                 @Override
                 public void onSuccess() {
                     FirebaseHelper.getInstance().setUsername(USERNAME_CONTENT);
-                    Log.v(TAG, "sign in successful");
+                    Log.v(TAG, ON_SUCCESS_MESSAGE);
                     startActivity(new Intent(SignInActivity.this, LogInActivity.class));
                 }
 
                 @Override
                 public void onError() {
-
+                    Log.v(TAG, ON_ERROR_MESSAGE);
                 }
             });
         } else{
-            Toast.makeText(SignInActivity.this, "invalid username/password", Toast.LENGTH_LONG).show();
+            Toast.makeText(SignInActivity.this, INVALID_USERNAME_PASSWORD, Toast.LENGTH_LONG).show();
         }
     }
 

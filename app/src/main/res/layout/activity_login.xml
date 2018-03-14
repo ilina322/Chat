@@ -1,26 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-    android:orientation="vertical"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
     android:background="@color/colorPrimary"
-    xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:orientation="vertical">
 
     <ImageView
-        android:layout_above="@id/login_form"
-        android:layout_margin="16dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:src="@drawable/login"/>
+        android:layout_above="@id/login_form"
+        android:layout_margin="16dp"
+        android:src="@drawable/login" />
 
     <LinearLayout
-        android:layout_marginLeft="16dp"
-        android:layout_marginRight="16dp"
-        android:layout_centerInParent="true"
-        android:orientation="vertical"
-        android:background="#ffffff"
         android:id="@+id/login_form"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        android:background="#ffffff"
+        android:orientation="vertical">
 
 
         <android.support.design.widget.TextInputLayout
@@ -37,6 +37,7 @@
                 android:textSize="20sp" />
 
         </android.support.design.widget.TextInputLayout>
+
         <android.support.design.widget.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -47,47 +48,45 @@
                 android:id="@+id/password_login"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Password"
+                android:hint="@string/password"
                 android:inputType="textPassword"
                 android:textSize="20sp" />
 
         </android.support.design.widget.TextInputLayout>
 
         <Button
-            android:layout_margin="8dp"
             android:id="@+id/login_btn"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
             android:layout_below="@id/login_form"
-            android:fontFamily="serif-monospace"
-            android:textStyle="bold"
-            android:textColor="#fff"
-            android:background="@drawable/selector_button"
+            android:layout_centerHorizontal="true"
+            android:layout_margin="8dp"
             android:layout_marginTop="16dp"
-            android:text="let's go"
-            android:onClick="logIn"/>
+            android:background="@drawable/selector_button"
+            android:fontFamily="serif-monospace"
+            android:text="@string/let_s_go"
+            android:textColor="#fff"
+            android:textStyle="bold" />
     </LinearLayout>
 
     <TextView
         android:id="@+id/alertTitleLogin"
-        android:layout_margin="10dp"
-        android:layout_below="@id/login_form"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="new to GossipPal?"
-        android:layout_centerHorizontal="true"/>
+        android:layout_below="@id/login_form"
+        android:layout_centerHorizontal="true"
+        android:layout_margin="10dp"
+        android:text="@string/new_to_gossippal" />
 
 
     <Button
-        android:background="@android:color/transparent"
         android:id="@+id/signin_btn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/alertTitleLogin"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="12dp"
-        android:onClick="openGoogleSignin"
-        android:text="sign in" />
+        android:background="@android:color/transparent"
+        android:text="@string/sign_in" />
 
 </RelativeLayout>

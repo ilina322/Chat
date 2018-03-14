@@ -1,13 +1,10 @@
 package com.example.android.chat;
 
-import android.content.Context;
 import android.net.Uri;
 import android.support.annotation.NonNull;
-import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
@@ -24,19 +21,22 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
-import java.util.Date;
-
 /**
  * Created by Me on 3.2.2018 г..
  */
 
 public class FirebaseHelper {
 
-    public static final String TABLE_NAME_USERS = "Users";
-    public static final String FIELD_USERNAME = "Username";
-    public static final String TABLE_NAME_MESSAGES = "Messages";
-    public static final String CHILD_NAME_IS_ADMIN = "isAdmin";
-    public static final String CHILD_NAME_USERNAME = "Username";
+    private static final String TABLE_NAME_USERS = "Users";
+    private static final String TABLE_NAME_MESSAGES = "Messages";
+    private static final String TABLE_PHOTOS = "Photos";
+
+    private static final String FIELD_USERNAME = "username";
+    private static final String FIELD_NAME_IS_ADMIN = "isAdmin";
+    private static final String FIELD_IMAGE_PATH = "imagePath";
+    private static final String FIELD_CONTENT = "content";
+    private static final String FIELD_IS_SENT_BY_ADMIN = "isSentByAdmin";
+
     private final FirebaseUser currentUser;
     private static FirebaseHelper instance;
     private final FirebaseAuth firebaseAuth;
@@ -60,13 +60,13 @@ public class FirebaseHelper {
     }
 
     public Query getUserDataReference() {
-        Query databaseMessagesOnlyUser = messagesDatabaseReference.orderByChild("isSentByAdmin").equalTo(false);
+        Query databaseMessagesOnlyUser = messagesDatabaseReference.orderByChild(FIELD_IS_SENT_BY_ADMIN).equalTo(false);
         return databaseMessagesOnlyUser;
 
     }
 
     public Query getAdminDataReference() {
-        Query databaseMessagesOnlyAdmin = messagesDatabaseReference.orderByChild("isSentByAdmin").equalTo(true);
+        Query databaseMessagesOnlyAdmin = messagesDatabaseReference.orderByChild(FIELD_IS_SENT_BY_ADMIN).equalTo(true).limitToLast(3);
         return databaseMessagesOnlyAdmin;
     }
 
@@ -118,11 +118,12 @@ public class FirebaseHelper {
     }
 
     public void sendMessageWithPhoto(final Uri uri, final String messageValue, final OnResultListener listener) {
-        StorageReference filepath = storage.child("Photos").child(uri.getLastPathSegment());
+        StorageReference filepath = storage.child(TABLE_PHOTOS).child(uri.getLastPathSegment());
         filepath.putFile(uri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
             @Override
-            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {;
-                sendMessage(uri, messageValue, listener);
+            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                Uri downloadUrl = taskSnapshot.getDownloadUrl();
+                sendMessage(downloadUrl, messageValue, listener);
             }
         });
     }
@@ -130,25 +131,24 @@ public class FirebaseHelper {
     private void sendMessage(final Uri downloadUri, final String messageValue, final OnResultListener listener) {
 
         if (downloadUri != null || !TextUtils.isEmpty(messageValue)) {
-            DatabaseReference userReference = usersDatabaseReference.child(currentUser.getUid());
+            DatabaseReference userReference = usersDatabaseReference.child(getUserId());
             final DatabaseReference newPostReference = messagesDatabaseReference.push();
             userReference.addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
-                    Object isAdminRaw = dataSnapshot.child(CHILD_NAME_IS_ADMIN).getValue();
-                    Log.v("FirebaseHelper", dataSnapshot.child(CHILD_NAME_USERNAME).getValue().toString());
-                    final String USERNAME = dataSnapshot.child(CHILD_NAME_USERNAME).getValue().toString();
+                    Object isAdminRaw = dataSnapshot.child(FIELD_NAME_IS_ADMIN).getValue();
+                    final String USERNAME = dataSnapshot.child(FIELD_USERNAME).getValue().toString();
                     if (isAdminRaw != null) {
                         boolean isAdmin = Integer.parseInt(isAdminRaw.toString()) == 1;
-                        newPostReference.child("isSentByAdmin").setValue(isAdmin);
+                        newPostReference.child(FIELD_IS_SENT_BY_ADMIN).setValue(isAdmin);
                     } else {
-                        newPostReference.child("isSentByAdmin").setValue(false);
+                        newPostReference.child(FIELD_IS_SENT_BY_ADMIN).setValue(false);
                     }
                     if (downloadUri != null) {
-                        newPostReference.child("imagePath").setValue(downloadUri.toString());
+                        newPostReference.child(FIELD_IMAGE_PATH).setValue(downloadUri.toString());
                     }
-                    newPostReference.child("content").setValue(messageValue);
-                    newPostReference.child("username").setValue(USERNAME);
+                    newPostReference.child(FIELD_CONTENT).setValue(messageValue);
+                    newPostReference.child(FIELD_USERNAME).setValue(USERNAME);
                     listener.onSuccess();
 
                 }

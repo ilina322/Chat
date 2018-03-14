@@ -26,6 +26,7 @@ import com.google.firebase.auth.GoogleAuthProvider;
 public class AuthenticationHelper {
 
     private static final String TAG = "AuthenticationHelper";
+    public static final String ON_ERROR_MESSAGE = "Google sign in failed";
     private static AuthenticationHelper instance;
     private GoogleSignInClient mGoogleSignInClient;
     private FirebaseAuth mAuth;
@@ -59,7 +60,7 @@ public class AuthenticationHelper {
             firebaseAuthWithGoogle(account, listener);
         } catch (ApiException e) {
             // Google Sign In failed, update UI appropriately
-            Log.w(TAG, "Google sign in failed", e);
+            Log.w(TAG, ON_ERROR_MESSAGE, e);
             listener.onError();
         }
     }
